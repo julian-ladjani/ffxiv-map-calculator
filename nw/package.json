@@ -1,0 +1,23 @@
+{
+  "name": "ffxiv-map-calculator",
+  "version": "1.0.0",
+  "description": "FFXIV Map Calculator",
+  "main": "../dist/index.html",
+  "type": "module",
+  "scripts": {
+    "start": "node ../build.cjs"
+  },
+  "window": {
+    "title": "FFXIV Map Calculator",
+    "toolbar": false,
+    "frame": true,
+    "width": 1600,
+    "height": 800,
+    "position": "center",
+    "min_width": 800,
+    "min_height": 400
+  },
+  "webkit": {
+    "plugin": true
+  }
+}

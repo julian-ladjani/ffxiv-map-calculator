@@ -1,0 +1,54 @@
+{
+  "name": "ffxiv-map-calculator",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "serve": "vite preview",
+    "build": "vite build",
+    "dev": "vite",
+    "nw-build": "yarn build && node nw/build.cjs",
+    "nw-build-only": "node nw/build.cjs",
+    "nw-serve": "nw .",
+    "preview": "vite preview"
+  },
+  "main": "http://127.0.0.1:5173/",
+  "dependencies": {
+    "@mdi/font": "5.9.55",
+    "@xivapi/js": "^0.4.1",
+    "@xivapi/vue-xivtooltips": "^0.1.10",
+    "axios": "^0.27.2",
+    "crypto": "^1.0.1",
+    "dayjs": "^1.11.5",
+    "lodash": "^4.17.21",
+    "nw-builder": "^3.8.6",
+    "roboto-fontface": "*",
+    "vue": "^3.2.37",
+    "vuetify": "npm:@vuetify/nightly@next",
+    "vuex": "^4.0.0",
+    "vuex-persist": "^3.1.3",
+    "webfontloader": "^1.0.0"
+  },
+  "devDependencies": {
+    "@erhhung/node-resource-hacker": "^1.0.1",
+    "@vitejs/plugin-vue": "^3.1.0",
+    "@vue/cli-plugin-vuex": "~5.0.0",
+    "nw": "^0.69.1-sdk",
+    "vite": "^3.1.0",
+    "vite-plugin-vuetify": "^1.0.0-alpha.12",
+    "vue-cli-plugin-vuetify": "~2.5.8"
+  },
+  "build": {
+    "nwVersion": "1.0.0"
+  },
+  "type": "module",
+  "window": {
+    "title": "FFXIV Map Calculator",
+    "toolbar": false,
+    "frame": true,
+    "width": 1600,
+    "height": 800,
+    "position": "center",
+    "min_width": 800,
+    "min_height": 400
+  }
+}
