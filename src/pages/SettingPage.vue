@@ -35,6 +35,15 @@
             :model-value="settings.tax"
             @update:modelValue="onTaxChanged($event)"
         />
+        <v-text-field
+            label="Pourcentage de la valeur de rachat"
+            prefix="%"
+            type="number"
+            required
+            ref="tax"
+            :model-value="settings.buyPricePercent"
+            @update:modelValue="onBuyPricePercentChanged($event)"
+        />
         <v-select
             label="Chiffres après la virgule (arrondis)"
             :items="[0, 1, 2 , 3]"
@@ -90,6 +99,16 @@ export default {
       if (tax > 100)
         tax = 100
       store.dispatch("setTax", tax)
+    },
+    onBuyPricePercentChanged(percent) {
+      if (isNaN(percent) || percent.length > 0 || percent < 0) {
+        percent = 0
+      } else {
+        percent = parseInt(percent)
+      }
+      if (percent > 100)
+        percent = 100
+      store.dispatch("setBuyPricePercentChanged", percent)
     },
     onPayTaxIfItemGainIsNotEnoughChanged(value) {
       store.dispatch("setPayTaxIfItemGainIsNotEnough", value === true)

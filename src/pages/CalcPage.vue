@@ -9,7 +9,7 @@
         >
           <v-tab value="players">Joueurs</v-tab>
           <v-tab value="maps">Cartes</v-tab>
-          <!--<v-tab value="global">Global</v-tab>-->
+          <v-tab value="global">Global</v-tab>
         </v-tabs>
       </v-col>
     </v-row>
@@ -27,6 +27,9 @@
                 <tr>
                   <th class="text-left">
                     Nom ({{ Object.values(user.maps).length }} carte(s))
+                  </th>
+                  <th class="text-left">
+                    Incluse
                   </th>
                   <th class="text-left">
                     Gain (items)
@@ -53,7 +56,14 @@
                     v-for="map in user.maps"
                     :key="map.id"
                 >
-                  <td>{{ map.name }}</td>
+                  <td>{{ map.name }}{{ map.owner !== undefined && map.owner !== null ? " - " + map.owner.name : "" }}</td>
+                  <td>
+                    <v-checkbox
+                        hide-details
+                        readonly
+                        :model-value="map.includeInCalculation"
+                    ></v-checkbox>
+                  </td>
                   <td>{{ map.totalItemGain }} gils</td>
                   <td>{{ map.totalGilsGain }} gils</td>
                   <td>{{ map.totalGain }} gils</td>
@@ -63,6 +73,9 @@
                 </tr>
                 <tr>
                   <td>Total</td>
+                  <td>
+
+                  </td>
                   <td>{{ user.totalItemGain }} gils</td>
                   <td>{{ user.totalGilsGain }} gils</td>
                   <td>{{ user.totalGain }} gils</td>
@@ -83,9 +96,10 @@
         <v-col>
           <v-card>
             <v-card-title>
-              <span class="text-h5">{{ map.name }}</span>
+              <span class="text-h5">{{ map.name }}{{ map.owner !== undefined && map.owner !== null ? " - " + map.owner.name : "" }}</span>
             </v-card-title>
             <v-card-text>
+              <span class="text-body-1" v-if="map.includeInCalculation === false">Cette carte n'est pas incluse dans les calculs</span>
               <v-table>
                 <thead>
                 <tr>
@@ -128,7 +142,9 @@
                 </tr>
                 <tr>
                   <td>Par joueur</td>
-                  <td>{{ map.nbPlayer <= 0 ? 0 : parseFloat((map.nbItems / map.nbPlayer).toFixed(precision)) }} item(s)</td>
+                  <td>{{ map.nbPlayer <= 0 ? 0 : parseFloat((map.nbItems / map.nbPlayer).toFixed(precision)) }}
+                    item(s)
+                  </td>
                   <td>{{ map.itemGainPerUser }} gils</td>
                   <td>{{ map.gilsGainPerUser }} gils</td>
                   <td>{{ map.totalGainPerUser }} gils</td>
@@ -138,8 +154,66 @@
                 </tr>
                 </tbody>
               </v-table>
-              <span class="text-body-1" v-if="map.nbPlayer > 0">Joueurs: {{ map.users.map(user => user.name).join(', ') }}</span>
+              <span class="text-body-1" v-if="map.nbPlayer > 0">Joueurs: {{
+                  map.users.map(user => user.name).join(', ')
+                }}</span>
               <span class="text-body-1" v-else>Il n'y a aucun joueur sur cette carte</span>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-spacer style="height: 8px"/>
+    </div>
+    <div v-if="tab === 'global'" style="width: 100%">
+      <v-row>
+        <v-col>
+          <v-card>
+            <v-card-title>
+              <span class="text-h5">Récapitulatif</span>
+            </v-card-title>
+            <v-card-text>
+              <v-table>
+                <thead>
+                <tr>
+                  <th class="text-left">
+                    Nom
+                  </th>
+                  <th class="text-left">
+                    Gain (items)
+                  </th>
+                  <th class="text-left">
+                    Gain (gils)
+                  </th>
+                  <th class="text-left">
+                    Gain (total)
+                  </th>
+                  <th class="text-left">
+                    Taxe ({{ tax }}%)
+                  </th>
+                  <th class="text-left">
+                    A donner
+                  </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="user in Object.values(calc.users)">
+                  <td>{{ user.name }}</td>
+                  <td>{{ user.totalItemGain }} gils</td>
+                  <td>{{ user.totalGilsGain }} gils</td>
+                  <td>{{ user.totalGain }} gils</td>
+                  <td>{{ user.totalTax }} gils</td>
+                  <td>{{ user.needToGive }} gils</td>
+                </tr>
+                <tr>
+                  <td>Total</td>
+                  <td>{{ calc.totalItemGain }} gils</td>
+                  <td>{{ calc.totalGilsGain }} gils</td>
+                  <td>{{ calc.totalGain }} gils</td>
+                  <td>{{ calc.totalTax }} gils</td>
+                  <td>{{ calc.needToGive }} gils</td>
+                </tr>
+                </tbody>
+              </v-table>
             </v-card-text>
           </v-card>
         </v-col>

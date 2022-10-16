@@ -22,7 +22,7 @@
 
         <template v-slot:append>
           <div class="pa-2">
-
+            <span v-on:click="store.dispatch('openUrl', 'https://github.com/julian-ladjani/ffxiv-map-calculator')" >Version {{ version }}.</span>
           </div>
         </template>
       </v-navigation-drawer>
@@ -32,6 +32,7 @@
 import logo from '../assets/logo.svg'
 import store from "../store/index.js";
 import { useTheme } from 'vuetify'
+import packageJson from "../../package.json"
 
 let currentTheme;
 export default {
@@ -47,6 +48,7 @@ export default {
     title: String
   },
   data: () => ({
+    version: packageJson.version,
     store: store,
     console: console,
     currentTheme,

@@ -10,5 +10,5 @@ export default defineConfig({
     plugins: [
         vue(),
         vuetify({autoImport: true}),
-    ]
+    ],
 })

@@ -32,7 +32,10 @@
           A donner
         </th>
         <th class="text-left">
-          Cartes
+          Cartes (gérant)
+        </th>
+        <th class="text-left">
+          Cartes (joueur)
         </th>
         <th class="text-button"></th>
       </tr>
@@ -48,6 +51,7 @@
         <td v-on:click="openModal(user.id)">{{ calc.users[user.id].totalGain }} gils</td>
         <td v-on:click="openModal(user.id)">{{ calc.users[user.id].totalTax }} gils</td>
         <td v-on:click="openModal(user.id)">{{ calc.users[user.id].needToGive }} gils</td>
+        <td v-on:click="openModal(user.id)">{{ mapsOwnerCount.find(count => count.userId === user.id)?.mapCount ?? 0 }}</td>
         <td v-on:click="openModal(user.id)">{{ mapsCount.find(count => count.userId === user.id)?.mapCount ?? 0 }}</td>
         <td>
           <v-btn icon="mdi-close" variant="plain" color="error" v-on:click="removeUser(user.id)"/>
@@ -94,6 +98,14 @@ export default {
         return {
           userId: user.id,
           mapCount: this.$store.state.maps.filter(map => map.users.find(mapUser => mapUser === user.id) !== undefined).length ?? 0
+        }
+      })
+    },
+    mapsOwnerCount() {
+      return this.users.map(user => {
+        return {
+          userId: user.id,
+          mapCount: this.$store.state.maps.filter(map => map.owner === user.id).length ?? 0
         }
       })
     },

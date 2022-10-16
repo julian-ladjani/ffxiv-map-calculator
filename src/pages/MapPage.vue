@@ -17,6 +17,9 @@
           Nom
         </th>
         <th class="text-left">
+          Gérant
+        </th>
+        <th class="text-left">
           Nombre d'items
         </th>
         <th class="text-left">
@@ -31,6 +34,7 @@
           :key="map.id"
       >
         <td v-on:click="openModal(map.id)">{{ map.name }}</td>
+        <td v-on:click="openModal(map.id)">{{ getOwner(map.owner) }}</td>
         <td v-on:click="openModal(map.id)">{{ countItems(map.items) }}</td>
         <td v-on:click="openModal(map.id)">{{ map.users.length }}</td>
         <td><v-btn icon="mdi-close" variant="plain" color="error" v-on:click="removeMap(map.id)"/></td>
@@ -46,6 +50,7 @@
 <script>
 import MapModal from "../components/MapModal.vue";
 import store from "../store/index.js";
+import User from "../models/User.js";
 
 export default {
   name: 'MapPage',
@@ -63,6 +68,11 @@ export default {
       this.modalUserId = id
       this.modalDisplayed = true
     },
+    getOwner(id) {
+      if (id === null)
+        return User.UnknownUser().name
+      return this.users.find(user => user.id === id)?.name ?? User.UnknownUser().name
+    },
     countItems(items) {
       function add(accumulator, a) {
         return accumulator + a;
@@ -74,7 +84,8 @@ export default {
     }
   },
   computed: {
-    maps() { return this.$store.state.maps }
+    maps() { return this.$store.state.maps },
+    users() { return this.$store.state.users }
   },
 }
 </script>

@@ -5,6 +5,7 @@ import Item from "../models/Item.js"
 import Map from "../models/Map.js"
 import User from "../models/User.js"
 import axios from 'axios'
+import pkg from '../../package.json'
 
 const vuexPersist = new VuexPersist({
     key: "ffxiv-map-calculator",
@@ -24,6 +25,7 @@ export default createStore({
                 payTaxIfItemGainIsNotEnough: true,
                 tax: 10,
                 precision: 0,
+                buyPricePercent: 80
             }
         }
     },
@@ -50,17 +52,25 @@ export default createStore({
         getPrecision(state) {
             return state.settings.precision
         },
+        getItemBuyPrice: (state, getters) => (id) => {
+            let item = state.items.find(item => item.id === id)
+            if (item === undefined)
+                return 0
+            return parseFloat(((item.price / 100) * state.settings.buyPricePercent).toFixed(getters.getPrecision))
+        },
         getTotalItemGain(state, getters) {
             let totalGain = 0
             state.maps.forEach(map => {
-                totalGain += getters.getTotalMapItemGain(map.id)
+                if (map.includeInCalculation)
+                    totalGain += getters.getTotalMapItemGain(map.id)
             })
             return totalGain
         },
         getTotalGain(state, getters) {
             let totalGain = 0
             state.maps.forEach(map => {
-                totalGain += getters.getTotalMapGain(map.id)
+                if (map.includeInCalculation)
+                    totalGain += getters.getTotalMapGain(map.id)
             })
             return totalGain
         },
@@ -102,7 +112,8 @@ export default createStore({
                 return 0
             let totalGain = 0
             maps.forEach(map => {
-                totalGain += getters.getTotalMapGainPerUser(map.id)
+                if (map.includeInCalculation)
+                    totalGain += getters.getTotalMapGainPerUser(map.id)
             })
             return totalGain
         },
@@ -112,7 +123,8 @@ export default createStore({
                 return 0
             let totalGain = 0
             maps.forEach(map => {
-                totalGain += getters.getTotalMapItemGainPerUser(map.id)
+                if (map.includeInCalculation)
+                    totalGain += getters.getTotalMapItemGainPerUser(map.id)
             })
             return totalGain
         },
@@ -141,6 +153,7 @@ export default createStore({
             let userSet = {}
             let totalItemGain = getters.getTotalItemGain
             let totalGain = getters.getTotalGain
+            let totalTax = getters.getTaxesFromGain(totalGain)
             state.maps.forEach(map => {
                 let totalMapItemGain = getters.getTotalMapItemGain(map.id)
                 let totalMapGain = getters.getTotalMapGain(map.id)
@@ -151,7 +164,9 @@ export default createStore({
                 mapSet[map.id] = {
                     id: map.id,
                     name: map.name,
+                    includeInCalculation: map.includeInCalculation,
                     users: state.users.filter(user => map.users.some(mapUser => mapUser === user.id)),
+                    owner: state.users.find(user => map.owner === user.id),
                     nbPlayer: map.users.length,
                     nbItems: map.items.map(item => item.count).reduce(function add(accumulator, a) {return accumulator + a;}, 0),
                     totalItemGain: totalMapItemGain,
@@ -178,6 +193,8 @@ export default createStore({
                     userMapSet[userMap.id] = {
                         id: userMap.id,
                         name: userMap.name,
+                        includeInCalculation: userMap.includeInCalculation,
+                        owner: state.users.find(user => userMap.owner === user.id),
                         totalItemGain: totalUserMapItemGain,
                         totalGilsGain: userMap.singleUserProfit,
                         totalGain: totalUserMapGain,
@@ -202,7 +219,8 @@ export default createStore({
                 totalItemGain: totalItemGain,
                 totalGilsGain: totalGain - totalItemGain,
                 totalGain: totalGain,
-                totalTax: getters.getTaxesFromGain(totalGain)
+                totalTax: totalTax,
+                needToGive: parseFloat((state.settings.payTaxIfItemGainIsNotEnough ? totalItemGain - totalTax : Math.max(0, totalItemGain - totalTax)).toFixed(getters.getPrecision))
             }
         },
     },
@@ -281,6 +299,9 @@ export default createStore({
         SET_TAX(state, data) {
             state.settings.tax = data
         },
+        SET_BUY_PRICE_PERCENT_CHANGED(state, data) {
+            state.settings.buyPricePercent = data
+        },
         SET_PRECISION(state, data) {
             state.settings.precision = data
         },
@@ -297,6 +318,30 @@ export default createStore({
                 "https://xivapi.com" + item.Url,
                 "https://xivapi.com" + item.Icon)
             )
+        },
+        async getNewVersion(context) {
+            let result = await axios.get("https://api.github.com/repos/julian-ladjani/ffxiv-map-calculator/releases")
+            return result?.data?.find(version => version?.draft === false && version?.prerelease === false) ?? null
+        },
+        getCurrentVersion(context) {
+            return pkg.version
+        },
+        async getVersion(context) {
+            return {
+                currentVersion: await context.dispatch('getCurrentVersion'),
+                newVersion: await context.dispatch('getNewVersion'),
+            }
+        },
+        openUrl(context, payload) {
+            let url = payload.url !== undefined ? payload.url : payload
+            let close = payload.close !== undefined ? payload.close : false
+            if (typeof nw !== "undefined") {
+                nw.Shell.openExternal(url)
+                if (close)
+                    window.close()
+            }
+            else
+                window.open(url ?? payload)
         },
         setUser(context, payload) {
             context.commit("SET_USER", payload);
@@ -330,6 +375,9 @@ export default createStore({
         },
         setTax(context, tax) {
             context.commit("SET_TAX", tax)
+        },
+        setBuyPricePercentChanged(context, percent) {
+            context.commit("SET_BUY_PRICE_PERCENT_CHANGED", percent)
         },
         setPrecision(context, precision) {
             context.commit("SET_PRECISION", precision)

@@ -13,11 +13,29 @@
           </v-row>
           <v-row>
             <v-text-field
-                label="Nom*"
+                label="Nom"
                 required
                 ref="name"
                 v-model="currentMap.name"
             />
+          </v-row>
+          <v-row>
+          <v-select
+              label="Gérant (à titre indicatif)"
+              :items="[getUnknownUser()].concat(users)"
+              item-title="name"
+              item-value="id"
+              ref="owner"
+              v-model="currentMap.owner"
+          ></v-select>
+          </v-row>
+          <v-row>
+            <v-select
+                label="Niveau (à titre indicatif)"
+                :items="[50, 60, 70, 80, 90]"
+                ref="level"
+                v-model="currentMap.level"
+            ></v-select>
           </v-row>
           <v-row>
             <v-text-field
@@ -27,14 +45,6 @@
                 ref="singleUserProfit"
                 v-model="currentMap.singleUserProfit"
             />
-          </v-row>
-          <v-row>
-            <v-select
-                label="Niveau"
-                :items="[50, 60, 70, 80, 90]"
-                ref="level"
-                v-model="currentMap.level"
-            ></v-select>
           </v-row>
           <v-row>
             <v-checkbox
@@ -199,6 +209,7 @@ import 'dayjs/locale/fr'
 import UserModal from "./UserModal.vue";
 import ItemSearchModal from "./ItemSearchModal.vue";
 import MapItem from "../models/MapItem.js";
+import User from "../models/User.js";
 
 export default {
   name: 'MapModal',
@@ -267,6 +278,9 @@ export default {
       mapItems.push(new MapItem(id, count))
       this.currentMap.items = mapItems
     },
+    getUnknownUser() {
+      return User.UnknownUser()
+    },
     /*setUserIsInMap(id, member) {
       if (member === true) {
         if (this.currentMap.users.some(user => user === id))
@@ -301,6 +315,7 @@ export default {
         }
         if (map === undefined) {
           map = new Map("Carte du " + dayjs(new Date()).format("DD MMMM YYYY à HH:mm"))
+          map.users = store.getters.getMaps.slice(-1)[0]?.users ?? []
         }
         this.currentMap = map
       }

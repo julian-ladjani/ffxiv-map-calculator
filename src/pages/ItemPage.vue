@@ -21,7 +21,10 @@
           Nom
         </th>
         <th class="text-left">
-          Prix
+          Prix (rachat ({{ itemBuyPercent }} %))
+        </th>
+        <th class="text-left">
+          Prix (HV)
         </th>
         <th class="text-button"></th>
       </tr>
@@ -36,6 +39,7 @@
         </td>
         <td>{{ item.id }}</td>
         <td>{{ item.name }}</td>
+        <td>{{ getItemBuyPrice(item.id) }} gils</td>
         <td>
           <v-text-field
               prefix="Gils"
@@ -88,13 +92,19 @@ export default {
       } else {
         fixedPrice = parseInt(price)
       }
-      store.dispatch("setItemPrice", { id: id, price: fixedPrice })
+      store.dispatch("setItemPrice", {id: id, price: fixedPrice})
+    },
+    getItemBuyPrice(id) {
+      return store.getters.getItemBuyPrice(id)
     }
   },
   computed: {
     items() {
       return this.$store.state.items
     },
+    itemBuyPercent() {
+      return this.$store.state.settings.buyPricePercent
+    }
   }
 }
 </script>
